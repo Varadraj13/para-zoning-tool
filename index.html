@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Parametric Zoning Tool – Wireframe</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+</head>
+<body>
+  <nav class="topnav">
+    <div class="brand">Parametric Zoning Tool</div>
+    <div class="nav-actions">
+      <button class="btn ghost">Sign In</button>
+      <button class="btn ghost">API</button>
+      <button class="btn ghost">About</button>
+    </div>
+  </nav>
+
+  <div class="stepper" role="navigation" aria-label="Progress">
+    <ol>
+      <li class="step active" data-step="1"><span class="bubble">1</span><span>Site</span></li>
+      <li class="step" data-step="2"><span class="bubble">2</span><span>Rules</span></li>
+      <li class="step" data-step="3"><span class="bubble">3</span><span>Output</span></li>
+    </ol>
+  </div>
+
+  <!-- STEP 1 -->
+  <section class="container two-col" id="step-1">
+    <aside class="panel">
+      <h2>Step 01: Select Site</h2>
+
+      <label for="city">City</label>
+      <input id="city" placeholder="New York City" value="New York City" />
+
+      <label for="district">District</label>
+      <input id="district" placeholder="e.g., R7-2" />
+
+      <label for="address">Address</label>
+      <input id="address" placeholder="Search address" />
+
+      <label for="plot">Plot</label>
+      <input id="plot" placeholder="Select / Draw Plot" />
+
+      <div class="hint">Quick pick demo plots:</div>
+      <div class="btn-row wrap">
+        <button class="btn outline plot-btn" data-plot="TIMES_SQ">Times Sq</button>
+        <button class="btn outline plot-btn" data-plot="DUMBO">DUMBO</button>
+        <button class="btn outline plot-btn" data-plot="LIC">LIC</button>
+      </div>
+
+      <button class="btn primary" id="to-step-2">Continue to Rules</button>
+    </aside>
+
+    <div class="mapcard">
+      <div id="map" class="map"></div>
+
+      <div class="toolbar">
+        <div class="muted">Select a location or draw a plot to begin</div>
+        <div class="btn-row">
+          <button class="btn outline" id="reset-view">Reset View</button>
+          <button class="btn outline" id="draw-polygon">Draw Polygon</button>
+        </div>
+      </div>
+
+      <div id="summary" class="summary muted">
+        No parcel selected. Choose a demo plot or draw one to see details.
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="container two-col" id="step-2" hidden>
+    <aside class="panel">
+      <h2>Step 02: Program & Regulations</h2>
+
+      <details class="accordion" open>
+        <summary>Zoning</summary>
+        <div class="acc-body">
+          <label for="program-type">Program Type</label>
+          <select id="program-type">
+            <option>Residential</option>
+            <option>Mixed-use</option>
+            <option>Commercial</option>
+            <option>Industrial</option>
+          </select>
+
+          <label for="far">Target FAR</label>
+          <input id="far" placeholder="e.g., 6.5" />
+          <p id="far-error" class="error" role="alert" aria-live="polite"></p>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>Envelope</summary>
+        <div class="acc-body">
+          <label for="wwr">Wall-to-Window Ratio (%)</label>
+          <input id="wwr" placeholder="e.g., 40" />
+          <p id="wwr-error" class="error" role="alert" aria-live="polite"></p>
+
+          <label for="energy-mode">Energy Mode</label>
+          <select id="energy-mode">
+            <option>Auto-generated</option>
+            <option>Custom</option>
+          </select>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>MEP Systems</summary>
+        <div class="acc-body">
+          <label for="notes">Notes</label>
+          <textarea id="notes" placeholder="HVAC / Lighting / SWH / Power parameters"></textarea>
+        </div>
+      </details>
+
+      <button class="btn primary w-full" id="to-step-3" disabled>Continue to Output</button>
+      <p id="gate-note" class="hint">Resolve validation errors to proceed.</p>
+    </aside>
+
+    <div class="previewcard">
+      <div class="previewbox">[ 3D Plot / Context Visualization Placeholder ]</div>
+      <div class="metric-grid">
+        <div class="chip">GFA: — sf</div>
+        <div class="chip">FAR Achieved: —</div>
+        <div class="chip">Site Coverage: — %</div>
+        <div class="chip">Max Height: — ft</div>
+      </div>
+      <div class="toolbar between">
+        <button class="btn outline">Edit</button>
+        <div class="btn-row">
+          <button class="btn">Optimize</button>
+          <button class="btn secondary">Export Report</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="container center" id="step-3" hidden>
+    <div class="output">
+      <h2>Step 03: Net Zero Output</h2>
+      <p class="muted">Integrate open spaces, services, and optimized systems for a Net Zero building envelope.</p>
+      <button class="btn outline">Generate Summary Report</button>
+    </div>
+  </section>
+
+  <footer class="footer">© 2025 Parametric Zoning Tool – Concept Wireframe</footer>
+  <script src="app.js"></script>
+</body>
+</html>
