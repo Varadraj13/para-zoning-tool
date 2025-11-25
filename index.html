@@ -3,150 +3,434 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Parametric Zoning Tool – Wireframe</title>
+  <title>NYC Parametric Zoning Tool</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 </head>
 <body>
+  <!-- NYC-style Top Bar -->
   <nav class="topnav">
-    <div class="brand">Parametric Zoning Tool</div>
+    <div class="nav-left">
+      <svg class="nyc-logo" viewBox="0 0 32 32" width="24" height="24">
+        <path fill="#FF6B00" d="M8 4h16v24H8z"/>
+      </svg>
+      <div class="nav-title">
+        <h1>Parametric Zoning Tool</h1>
+        <p class="subtitle">NYC Property & Zoning Analysis</p>
+      </div>
+    </div>
     <div class="nav-actions">
-      <button class="btn ghost">Sign In</button>
-      <button class="btn ghost">API</button>
-      <button class="btn ghost">About</button>
+      <button class="nav-btn">Search Properties</button>
+      <button class="nav-btn">Documentation</button>
+      <button class="nav-btn">API</button>
+      <button class="nav-btn user-menu">User</button>
     </div>
   </nav>
 
+  <!-- Step Indicator -->
   <div class="stepper" role="navigation" aria-label="Progress">
     <ol>
-      <li class="step active" data-step="1"><span class="bubble">1</span><span>Site</span></li>
-      <li class="step" data-step="2"><span class="bubble">2</span><span>Rules</span></li>
-      <li class="step" data-step="3"><span class="bubble">3</span><span>Output</span></li>
+      <li class="step active" data-step="1"><span class="bubble">1</span><span>Select Site</span></li>
+      <li class="step" data-step="2"><span class="bubble">2</span><span>Program & Rules</span></li>
+      <li class="step" data-step="3"><span class="bubble">3</span><span>Generate & Analyze</span></li>
     </ol>
   </div>
 
-  <!-- STEP 1 -->
-  <section class="container two-col" id="step-1">
-    <aside class="panel">
-      <h2>Step 01: Select Site</h2>
-
-      <label for="city">City</label>
-      <input id="city" placeholder="New York City" value="New York City" />
-
-      <label for="district">District</label>
-      <input id="district" placeholder="e.g., R7-2" />
-
-      <label for="address">Address</label>
-      <input id="address" placeholder="Search address" />
-
-      <label for="plot">Plot</label>
-      <input id="plot" placeholder="Select / Draw Plot" />
-
-      <div class="hint">Quick pick demo plots:</div>
-      <div class="btn-row wrap">
-        <button class="btn outline plot-btn" data-plot="TIMES_SQ">Times Sq</button>
-        <button class="btn outline plot-btn" data-plot="DUMBO">DUMBO</button>
-        <button class="btn outline plot-btn" data-plot="LIC">LIC</button>
-      </div>
-
-      <button class="btn primary" id="to-step-2">Continue to Rules</button>
-    </aside>
-
-    <div class="mapcard">
-      <div id="map" class="map"></div>
-
-      <div class="toolbar">
-        <div class="muted">Select a location or draw a plot to begin</div>
-        <div class="btn-row">
-          <button class="btn outline" id="reset-view">Reset View</button>
-          <button class="btn outline" id="draw-polygon">Draw Polygon</button>
+  <!-- Persistent Map Container -->
+  <div class="app-container">
+    <!-- Left: Map (Always Visible) -->
+    <div class="map-panel persistent-map">
+      <div class="map-header">
+        <div class="search-bar">
+          <input type="text" id="address-search" placeholder="Search by Address, BBL, or Coordinates..." class="address-input" />
+          <button class="search-btn">🔍</button>
+        </div>
+        <div class="map-controls">
+          <button class="map-btn" title="Zoom in">+</button>
+          <button class="map-btn" title="Zoom out">−</button>
+          <button class="map-btn" title="Reset view">⟲</button>
         </div>
       </div>
-
-      <div id="summary" class="summary muted">
-        No parcel selected. Choose a demo plot or draw one to see details.
+      <div class="map-viewport">
+        <div id="map" class="map"></div>
       </div>
     </div>
-  </section>
 
-  <!-- STEP 2 -->
-  <section class="container two-col" id="step-2" hidden>
-    <aside class="panel">
-      <h2>Step 02: Program & Regulations</h2>
+    <!-- Right: Content Panels (Switch by Step) -->
+    <div class="content-panels">
+      <!-- STEP 1: Site Selection -->
+      <section class="step-view active" id="step-1">
+        <!-- Property Details Panel -->
+        <div class="details-panel">
+        <div class="panel-section active" id="property-details">
+          <div class="panel-header">
+            <h2>Property Details</h2>
+            <div class="quick-tabs">
+              <button class="tab-btn active" data-tab="property-info">Info</button>
+              <button class="tab-btn" data-tab="building-info">Building</button>
+              <button class="tab-btn" data-tab="land-info">Land</button>
+              <button class="tab-btn" data-tab="zoning-info">Zoning</button>
+            </div>
+          </div>
 
-      <details class="accordion" open>
-        <summary>Zoning</summary>
-        <div class="acc-body">
-          <label for="program-type">Program Type</label>
-          <select id="program-type">
-            <option>Residential</option>
-            <option>Mixed-use</option>
-            <option>Commercial</option>
-            <option>Industrial</option>
-          </select>
+          <!-- Property Info Tab -->
+          <div class="tab-content" id="property-info">
+            <div class="property-header">
+              <h3 id="prop-address"><span id="prop-address">—</span></h3>
+              <div class="property-meta">
+                <span class="meta-item"><strong>Borough:</strong> <span id="prop-borough">—</span></span>
+                <span class="meta-item"><strong>Block:</strong> <span id="prop-block">—</span></span>
+                <span class="meta-item"><strong>Lot:</strong> <span id="prop-lot">—</span></span>
+              </div>
+            </div>
 
-          <label for="far">Target FAR</label>
-          <input id="far" placeholder="e.g., 6.5" />
-          <p id="far-error" class="error" role="alert" aria-live="polite"></p>
+            <div class="accordion-group">
+              <details class="accordion-item" open>
+                <summary class="accordion-header">
+                  <span class="icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" stroke="#222" stroke-width="2" rx="2"/><rect x="5" y="1" width="6" height="2" fill="#222"/></svg></span>
+                  <span class="title">Property Information</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="data-row">
+                    <span class="label">Owner</span>
+                    <span class="value" id="prop-owner">—</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Lot Area</span>
+                    <span class="value" id="prop-lotarea">—</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Type</span>
+                    <span class="value" id="prop-type">—</span>
+                  </div>
+                </div>
+              </details>
+
+              <details class="accordion-item" open>
+                <summary class="accordion-header">
+                  <span class="icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="3" width="10" height="10" stroke="#222" stroke-width="2"/><rect x="6" y="6" width="1" height="1" fill="#222"/><rect x="9" y="6" width="1" height="1" fill="#222"/><rect x="6" y="9" width="1" height="1" fill="#222"/><rect x="9" y="9" width="1" height="1" fill="#222"/></svg></span>
+                  <span class="title">Building Information</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="data-row">
+                    <span class="label">Buildings</span>
+                    <span class="value" id="bldg-count">—</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Year Built</span>
+                    <span class="value" id="bldg-year">—</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Stories</span>
+                    <span class="value" id="bldg-stories">—</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Total Area</span>
+                    <span class="value" id="bldg-area">—</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Residential Units</span>
+                    <span class="value" id="bldg-resu">—</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Commercial Units</span>
+                    <span class="value" id="bldg-comu">—</span>
+                  </div>
+                </div>
+              </details>
+
+              <details class="accordion-item">
+                <summary class="accordion-header">
+                  <span class="icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="10" width="12" height="4" stroke="#222" stroke-width="2"/><rect x="6" y="2" width="4" height="8" stroke="#222" stroke-width="2"/></svg></span>
+                  <span class="title">Development Potential</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="data-row">
+                    <span class="label">Current FAR</span>
+                    <span class="value" id="dev-far">—</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Max FAR (As-of-right)</span>
+                    <span class="value" id="dev-maxfar">—</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Max Height</span>
+                    <span class="value" id="dev-height">—</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Setback Requirements</span>
+                    <span class="value" id="dev-setback">—</span>
+                  </div>
+                </div>
+              </details>
+            </div>
+          </div>
+
+          <!-- Other Tabs -->
+          <div class="tab-content" id="building-info" style="display:none;">
+            <div class="building-metrics">
+              <div class="metric-card">
+                <div class="metric-label">Construction Type</div>
+                <div class="metric-value" id="metric-construct">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Building Frontage</div>
+                <div class="metric-value" id="metric-frontage">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Building Depth</div>
+                <div class="metric-value" id="metric-depth">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Basements</div>
+                <div class="metric-value" id="metric-basements">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="land-info" style="display:none;">
+            <div class="building-metrics">
+              <div class="metric-card">
+                <div class="metric-label">Land Area</div>
+                <div class="metric-value" id="metric-land">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Lot Shape</div>
+                <div class="metric-value" id="metric-shape">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Corner Lot</div>
+                <div class="metric-value" id="metric-corner">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Assessed Value</div>
+                <div class="metric-value" id="metric-value">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="zoning-info" style="display:none;">
+            <div class="building-metrics">
+              <div class="metric-card">
+                <div class="metric-label">Zoning District</div>
+                <div class="metric-value" id="metric-zone">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Community Board</div>
+                <div class="metric-value" id="metric-cb">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Special District</div>
+                <div class="metric-value" id="metric-special">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Historic District</div>
+                <div class="metric-value" id="metric-historic">—</div>
+              </div>
+            </div>
+          </div>
         </div>
-      </details>
 
-      <details class="accordion">
-        <summary>Envelope</summary>
-        <div class="acc-body">
-          <label for="wwr">Wall-to-Window Ratio (%)</label>
-          <input id="wwr" placeholder="e.g., 40" />
-          <p id="wwr-error" class="error" role="alert" aria-live="polite"></p>
-
-          <label for="energy-mode">Energy Mode</label>
-          <select id="energy-mode">
-            <option>Auto-generated</option>
-            <option>Custom</option>
-          </select>
+        <!-- Continue Button -->
+        <div class="panel-footer">
+          <button class="action-btn primary w-full" id="step1-continue" disabled>Continue to Program & Rules →</button>
         </div>
-      </details>
-
-      <details class="accordion">
-        <summary>MEP Systems</summary>
-        <div class="acc-body">
-          <label for="notes">Notes</label>
-          <textarea id="notes" placeholder="HVAC / Lighting / SWH / Power parameters"></textarea>
         </div>
-      </details>
+      </section>
 
-      <button class="btn primary w-full" id="to-step-3" disabled>Continue to Output</button>
-      <p id="gate-note" class="hint">Resolve validation errors to proceed.</p>
-    </aside>
-
-    <div class="previewcard">
-      <div class="previewbox">[ 3D Plot / Context Visualization Placeholder ]</div>
-      <div class="metric-grid">
-        <div class="chip">GFA: — sf</div>
-        <div class="chip">FAR Achieved: —</div>
-        <div class="chip">Site Coverage: — %</div>
-        <div class="chip">Max Height: — ft</div>
-      </div>
-      <div class="toolbar between">
-        <button class="btn outline">Edit</button>
-        <div class="btn-row">
-          <button class="btn">Optimize</button>
-          <button class="btn secondary">Export Report</button>
+      <!-- STEP 2: Program & Regulations -->
+      <section class="step-view" id="step-2">
+        <!-- Left: Settings Panel -->
+        <div class="settings-panel">
+        <div class="panel-header">
+          <h2>Program & Regulations</h2>
         </div>
-      </div>
+
+        <div class="settings-content">
+          <div class="setting-group">
+            <label for="program-type">Program Type</label>
+            <select id="program-type">
+              <option>Residential</option>
+              <option>Mixed-use</option>
+              <option>Commercial</option>
+              <option>Industrial</option>
+            </select>
+          </div>
+
+          <details class="accordion-item" open>
+            <summary class="accordion-header">
+              <span class="icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="2,14 14,2" stroke="#222" stroke-width="2"/><rect x="2" y="12" width="2" height="2" fill="#222"/><rect x="12" y="2" width="2" height="2" fill="#222"/></svg></span>
+              <span class="title">Zoning Parameters</span>
+            </summary>
+            <div class="accordion-body">
+              <div class="setting-group">
+                <label for="far">Target FAR</label>
+                <input id="far" type="number" placeholder="e.g., 9.5" step="0.1" />
+                <p id="far-error" class="error"></p>
+              </div>
+
+              <div class="setting-group">
+                <label for="max-height">Max Height (ft)</label>
+                <input id="max-height" type="number" placeholder="e.g., 1000" />
+              </div>
+            </div>
+          </details>
+
+          <details class="accordion-item">
+            <summary class="accordion-header">
+              <span class="icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="6" width="10" height="7" stroke="#222" stroke-width="2"/><rect x="2" y="6" width="12" height="2" fill="#222"/><rect x="6" y="2" width="4" height="4" stroke="#222" stroke-width="2"/></svg></span>
+              <span class="title">Available Bonuses</span>
+            </summary>
+            <div class="accordion-body">
+              <div class="bonus-item">
+                <label class="checkbox-label">
+                  <input type="checkbox" value="inclusionary" class="bonus-check" />
+                  <div class="bonus-text">
+                    <strong>Inclusionary Housing</strong>
+                    <p>+20% FAR for 25% affordable units</p>
+                  </div>
+                </label>
+              </div>
+              <div class="bonus-item">
+                <label class="checkbox-label">
+                  <input type="checkbox" value="plaza" class="bonus-check" />
+                  <div class="bonus-text">
+                    <strong>Plaza/Greenspace</strong>
+                    <p>+10% FAR for 5,000 sf public plaza</p>
+                  </div>
+                </label>
+              </div>
+              <div class="bonus-item">
+                <label class="checkbox-label">
+                  <input type="checkbox" value="transit" class="bonus-check" />
+                  <div class="bonus-text">
+                    <strong>Transit-Oriented</strong>
+                    <p>+15% FAR near transit</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </details>
+
+          <details class="accordion-item">
+            <summary class="accordion-header">
+              <span class="icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="#222" stroke-width="2"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.5 3.5l1.5 1.5M11 11l1.5 1.5M3.5 12.5l1.5-1.5M11 5l1.5-1.5" stroke="#222" stroke-width="1.5"/></svg></span>
+              <span class="title">Building Systems</span>
+            </summary>
+            <div class="accordion-body">
+              <div class="setting-group">
+                <label for="wwr">Window-to-Wall Ratio (%)</label>
+                <input id="wwr" type="number" placeholder="e.g., 40" min="0" max="95" />
+                <p id="wwr-error" class="error"></p>
+              </div>
+
+              <div class="setting-group">
+                <label for="energy-mode">Energy Mode</label>
+                <select id="energy-mode">
+                  <option>Auto-generated</option>
+                  <option>Custom</option>
+                </select>
+              </div>
+
+              <div class="setting-group">
+                <label for="notes">MEP Notes</label>
+                <textarea id="notes" placeholder="HVAC, Lighting, SWH parameters..."></textarea>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="panel-footer">
+          <button class="action-btn outline w-full" id="step2-back">← Back to Site</button>
+          <button class="action-btn primary w-full" id="step2-continue" disabled>Generate Envelope →</button>
+          <p id="gate-note" class="hint">Complete required fields to proceed.</p>
+        </div>
+        </div>
+      </section>
+
+      <!-- STEP 3: Generate & Analyze -->
+      <section class="step-view" id="step-3">
+        <!-- Left: Analysis Panel -->
+        <div class="analysis-panel">
+        <div class="panel-header">
+          <h2>Generate & Analyze</h2>
+        </div>
+
+        <div class="analysis-content">
+          <div class="action-group">
+            <h3>Analysis Actions</h3>
+            <button class="action-btn primary w-full" id="generate-envelope">
+              <span><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" stroke="#222" stroke-width="2"/><rect x="5" y="5" width="6" height="6" fill="#222"/></svg></span> Generate Max Envelope
+            </button>
+            <button class="action-btn secondary w-full" id="optimize-massing">
+              <span><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polygon points="8,2 10,10 2,6 14,6 6,10" fill="#222"/></svg></span> Optimize Massing
+            </button>
+            <button class="action-btn outline w-full" id="export-report">
+              <span><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" stroke="#222" stroke-width="2"/><rect x="6" y="6" width="4" height="1" fill="#222"/><rect x="6" y="9" width="4" height="1" fill="#222"/></svg></span> Export Report (PDF)
+            </button>
+          </div>
+
+          <div class="results-group">
+            <h3>Envelope Results</h3>
+            <div class="metric-box">
+              <div class="metric-label">Volume</div>
+              <div class="metric-value" id="result-volume">—</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">GFA</div>
+              <div class="metric-value" id="result-gfa">—</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Achieved FAR</div>
+              <div class="metric-value" id="result-far">—</div>
+            </div>
+          </div>
+
+          <div class="status-message" id="status-msg" style="display:none;"></div>
+        </div>
+
+        <div class="panel-footer">
+          <button class="action-btn outline w-full" id="step3-back">← Back</button>
+        </div>
+        </div>
+
+        <!-- Right: Results Panel -->
+        <div class="results-panel">
+        <div class="panel-header">
+          <h2>3D Results</h2>
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-placeholder">
+            <p>3D Massing Result</p>
+            <p class="small">(Interactive visualization coming)</p>
+          </div>
+        </div>
+
+        <div class="results-summary">
+          <h3>Optimized Configurations</h3>
+          <div class="result-option">
+            <div class="option-name">FAR-Maximized</div>
+            <div class="option-metrics">
+              <span>FAR: 9.5</span>
+              <span>Efficiency: 89%</span>
+            </div>
+          </div>
+          <div class="result-option">
+            <div class="option-name">Light-Optimized</div>
+            <div class="option-metrics">
+              <span>FAR: 8.0</span>
+              <span>Efficiency: 92%</span>
+            </div>
+          </div>
+        </div>
+        </div>
+      </section>
     </div>
-  </section>
+  </div>
 
-  <!-- STEP 3 -->
-  <section class="container center" id="step-3" hidden>
-    <div class="output">
-      <h2>Step 03: Net Zero Output</h2>
-      <p class="muted">Integrate open spaces, services, and optimized systems for a Net Zero building envelope.</p>
-      <button class="btn outline">Generate Summary Report</button>
-    </div>
-  </section>
-
-  <footer class="footer">© 2025 Parametric Zoning Tool – Concept Wireframe</footer>
+  <footer class="footer">© 2025 NYC Parametric Zoning Tool – City Planning Analytics</footer>
   <script src="app.js"></script>
 </body>
 </html>

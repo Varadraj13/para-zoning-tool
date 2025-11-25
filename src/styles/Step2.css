@@ -1,0 +1,74 @@
+/* Step 2: Program & Regulations */
+.previewcard {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  height: fit-content;
+}
+
+.previewbox {
+  width: 100%;
+  min-height: 400px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-500);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+/* Bonuses */
+.bonuses-card {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+}
+
+.bonus-item {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.bonus-item:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.bonus-info {
+  margin: 0;
+}
+
+.bonus-info strong {
+  font-size: 13px;
+  color: var(--gray-800);
+}
+
+.bonus-info p {
+  margin: 2px 0;
+  font-size: 12px;
+  color: var(--gray-600);
+}
+
+/* Program */
+.program-card label {
+  margin-top: 8px;
+}
+
+.program-card input:first-of-type {
+  margin-top: 4px;
+}

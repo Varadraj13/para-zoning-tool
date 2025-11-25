@@ -1,0 +1,22 @@
+{
+  "1000001001": {
+    "far": 10.0,
+    "maxHeight": 120,
+    "yards": {
+      "front": 20,
+      "side": 8,
+      "rear": 30
+    },
+    "bonuses": ["inclusionary", "plaza"]
+  },
+  "1000002002": {
+    "far": 6.5,
+    "maxHeight": 80,
+    "yards": {
+      "front": 15,
+      "side": 6,
+      "rear": 25
+    },
+    "bonuses": ["transit"]
+  }
+}
